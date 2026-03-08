@@ -5,8 +5,9 @@ from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filte
 
 # ключ OpenAI из файла
 import os
-key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=key)
+
+
+client = OpenAI()
 
 # вставь сюда токен бота
 TELEGRAM_TOKEN = "8752728755:AAEGoRLOkXbrbgXEbgZ2ye79oIkXDr7bWZk"
@@ -93,4 +94,5 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Бот запущен...")
 app.run_polling()
+
 
