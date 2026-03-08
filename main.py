@@ -3,8 +3,8 @@ from openai import OpenAI
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-# ключ OpenAI из файла
-import os
+
+
 
 
 client = OpenAI()
@@ -94,5 +94,6 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Бот запущен...")
 app.run_polling()
+
 
 
