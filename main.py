@@ -1,3 +1,7 @@
+import sys
+import types
+
+sys.modules['imghdr'] = types.ModuleType('imghdr')
 from pathlib import Path
 from openai import OpenAI
 from telegram import Update, ReplyKeyboardMarkup
@@ -95,6 +99,7 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Бот запущен...")
 app.run_polling()
+
 
 
 
