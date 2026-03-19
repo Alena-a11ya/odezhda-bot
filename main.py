@@ -91,7 +91,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Сообщение клиента: {user_message}
 """
     )
-
+if any(word in user_message.lower() for word in ["платье", "платья", "плать"]):
+    await update.message.reply_text(
+        "👗 У нас красивые платья для девочек 💕\n\n"
+        "✔ Повседневные\n"
+        "✔ Нарядные\n"
+        "✔ Для садика\n\n"
+        "Напишите, пожалуйста:\n"
+        "• рост ребёнка\n"
+        "• возраст\n\n"
+        "И я подберу вам варианты 📸"
+    )
+    return
     await update.message.reply_text(response.output_text, reply_markup=reply_markup)
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
