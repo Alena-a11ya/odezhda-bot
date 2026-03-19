@@ -46,7 +46,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.strip().lower()
-
+if any(word in user_message for word in ["здравствуйте", "привет", "добрый день", "добрый вечер", "салам"]):
+        await update.message.reply_text(
+            "Здравствуйте 🌸\n"
+            "Добро пожаловать в наш магазин детской и подростковой одежды 👗\n\n"
+            "Напишите, что вас интересует:\n"
+            "• платья\n"
+            "• одежда для новорождённых\n"
+            "• одежда для подростков\n"
+            "• обувь\n"
+            "• размеры\n"
+            "• новинки",
+            reply_markup=reply_markup
+        )
+        return
     if user_message in ["/start", "start"]:
         await start(update, context)
         return
@@ -63,7 +76,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup,
         )
         return
-
+if user_message in ["подросток", "подростки", "подростковая одежда", "для подростков"]:
+        await update.message.reply_text(
+            "🧑‍🎤 У нас есть стильная одежда для подростков:\n\n"
+            "• худи\n"
+            "• костюмы\n"
+            "• кофты\n"
+            "• штаны\n\n"
+            "Напишите:\n"
+            "• рост\n"
+            "• возраст\n\n"
+            "И я подберу варианты 💕",
+            reply_markup=reply_markup,
+        )
+        return
     if user_message in ["📏 размеры", "размеры", "размер", "размерная сетка"]:
         await update.message.reply_text(
             SIZE_TEXT,
