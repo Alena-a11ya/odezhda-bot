@@ -99,9 +99,7 @@ if any(word in user_message.lower() for word in ["платье", "платья",
 Если покупатель спрашивает размер по возрасту — ориентируйся только на эту таблицу.
 Если не хватает информации — спроси рост ребёнка.
 
-Сообщение клиента: {user_message}
-"""
-    )
+
 
  await update.message.reply_text(response.output_text, reply_markup=reply_markup)
 
