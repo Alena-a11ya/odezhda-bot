@@ -103,9 +103,7 @@ if any(word in user_message.lower() for word in ["платье", "платья",
 """
     )
 
-    
- 
-    await update.message.reply_text(response.output_text, reply_markup=reply_markup)
+ await update.message.reply_text(response.output_text, reply_markup=reply_markup)
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
