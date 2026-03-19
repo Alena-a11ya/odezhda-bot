@@ -103,7 +103,7 @@ if any(word in user_message.lower() for word in ["платье", "платья",
 """
     )
 
-    )
+    
  
     await update.message.reply_text(response.output_text, reply_markup=reply_markup)
 
