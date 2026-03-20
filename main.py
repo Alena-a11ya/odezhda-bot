@@ -92,10 +92,15 @@ if any(word in user_message for word in ["здравствуйте", "приве
         )
         return
 
-    if user_message in ["💬 связь с продавцом", "связь с продавцом"]:
-        await update.message.reply_text(
-            "💬 Напишите ваш вопрос, и мы поможем 💕",
-            reply_markup=reply_markup,
+if user_message in ["💬 связь с продавцом", "связь с продавцом"]:
+    await update.message.reply_text(
+        "📞 Связь с продавцом:\n\n"
+        "Телефон: 8-775-45-20-600\n"
+        "📍 Адрес: Гагарина 60, ТД Астана\n\n"
+        "Можете написать или позвонить 💕",
+        reply_markup=reply_markup,
+    )
+    return
         )
         return
 
@@ -105,7 +110,12 @@ if any(word in user_message for word in ["здравствуйте", "приве
             reply_markup=reply_markup,
         )
         return
-
+if any(word in user_message for word in ["пока", "до свидания", "всего доброго"]):
+    await update.message.reply_text(
+        "До свидания 🌷\nБудем рады видеть вас снова 💕",
+        reply_markup=reply_markup
+    )
+    return
     await update.message.reply_text(
         "Я помогу вам с выбором 🌸\n\n"
         "Напишите:\n"
