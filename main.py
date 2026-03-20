@@ -87,7 +87,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup,
         )
         return
+# режим работы
+    if user_message in ["🕒 режим работы", "режим работы", "график"]:
+        await update.message.reply_text(
+            "🕒 Режим работы:\nЕжедневно с 10:00 до 18:00",
+            reply_markup=reply_markup,
+        )
+        return
 
+    # связь с продавцом
+    if user_message in ["💬 связь с продавцом", "связь с продавцом", "продавец", "связь"]:
+        await update.message.reply_text(
+            "📞 Связь с продавцом:\n\n"
+            "Телефон: 8-775-45-20-600\n"
+            "📍 Адрес: Гагарина 60, ТД Астана\n\n"
+            "Можете написать или позвонить 💕",
+            reply_markup=reply_markup,
+        )
+        return
     # общий ответ
     await update.message.reply_text(
         "Я помогу вам с выбором 🌸\n\n"
