@@ -1,134 +1,189 @@
+import os
 
+from openai import OpenAI
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
-TELEGRAM_TOKEN ="8752728755:AAEGoRLOkXbrbgXEbgZ2ye79oIkXDr7bWZk"
+TELEGRAM_TOKEN = "8752728755:AAEGoRLOkXbrbgXEbgZ2ye79oIkXDr7bWZk"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# кнопки
-reply_markup = ReplyKeyboardMarkup(
-    [
-        ["Платья", "Обувь"],
-        ["Новорожденные", "Подростковая одежда"],
-        ["Размеры", "Новинки"],
-        ["Адрес", "Связь с продавцом"],
-    ],
-    resize_keyboard=True,
-)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-# старт
+keyboard = [
+    ["🌿 Каталог", "📏 Размеры"],
+    ["📍 Адрес", "🕒 Режим работы"],
+    ["💬 Связь с продавцом", "🆕 Новинки"],
+]
+
+reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+SYSTEM_PROMPT = """
+Ты — вежливый и живой продавец магазина детской и подростковой одежды.
+Отвечай дружелюбно, естественно, коротко и по делу, как человек в переписке с клиентом.
+
+Правила:
+1. Не отвечай сухо и шаблонно.
+2. Не пиши длинные простыни текста.
+3. Если человек спрашивает про товар — помоги подобрать и уточни возраст, рост, размер или предпочтения.
+4. Если человек спрашивает про платье — уточни, интересуют повседневные, нарядные или для садика.
+5. Если человек спрашивает про обувь — уточни размер и для кого.
+6. Если человек спрашивает про новорождённых — уточни возраст малыша или рост.
+7. Если человек спрашивает про подростковую одежду — уточни рост, возраст и что именно ищут.
+8. Если человек здоровается — поздоровайся красиво и предложи помощь.
+9. Если человек благодарит — ответь тепло и коротко.
+10. Если человек прощается — попрощайся вежливо.
+11. Не выдумывай цены, которых тебе не сообщили.
+12. Не выдумывай наличие конкретной модели, если этого нет в сообщении клиента.
+13. Если вопрос про адрес, режим работы или связь с продавцом — не придумывай, лучше мягко направь к соответствующей кнопке, если это ещё не было дано вручную.
+14. Пиши на русском языке.
+
+Контекст магазина:
+- магазин детской и подростковой одежды
+- есть платья
+- есть одежда для новорождённых
+- есть подростковая одежда
+- есть обувь
+- есть размеры
+- есть новинки
+
+Размерная информация:
+- 0–3 мес — 56–62 см
+- 3–6 мес — 62–68 см
+- 6–9 мес — 68–74 см
+- 9–12 мес — 74–80 см
+- 1–2 года — 80–92 см
+- 2–3 года — 92–98 см
+- 3–4 года — 98–104 см
+- 4–5 лет — 104–110 см
+- 5–6 лет — 110–116 см
+- 6–7 лет — 116–122 см
+- 7–8 лет — 122–128 см
+- 8–9 лет — 128–134 см
+- 9–10 лет — 134–140 см
+- 11–12 лет — 146–152 см
+- 13–14 лет — 158–164 см
+"""
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Добро пожаловать 🌸\n"
-        "В наш магазин детской и подростковой одежды\n\n"
-        "Выберите раздел ниже 👇",
+        "Здравствуйте 🌸\n"
+        "Добро пожаловать в наш магазин детской и подростковой одежды.\n\n"
+        "Напишите, что вас интересует, или выберите раздел ниже 👇",
         reply_markup=reply_markup,
     )
 
-# ответы
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text.lower()
+    user_message = update.message.text.strip()
 
-    # платья
-    if "плать" in user_message:
+    lower_message = user_message.lower()
+
+    # Жёсткие кнопки/служебные ответы оставляем вручную
+    if lower_message in ["🌿 каталог", "каталог"]:
         await update.message.reply_text(
-            "Отлично 👗\n\n"
-            "Напишите, пожалуйста:\n"
-            "• возраст ребёнка\n"
-            "• рост\n"
-            "• какие модели интересуют:\n"
-            "  — повседневные\n"
-            "  — нарядные",
+            "🛍 У нас есть:\n\n"
+            "• Платья\n"
+            "• Одежда для новорождённых\n"
+            "• Одежда для девочек\n"
+            "• Одежда для мальчиков\n"
+            "• Подростковая одежда\n"
+            "• Обувь\n\n"
+            "Напишите, что именно вас интересует 💕",
             reply_markup=reply_markup,
         )
         return
 
-    # обувь
-    if "обув" in user_message:
-        await update.message.reply_text(
-            "Хорошо 👟\n\n"
-            "Напишите:\n"
-            "• размер\n"
-            "• для девочки или мальчика",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # новорожденные
-    if "новорож" in user_message:
-        await update.message.reply_text(
-            "Для новорожденных 👶\n\n"
-            "Напишите:\n"
-            "• возраст\n"
-            "• что именно ищете",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # подростки
-    if "подрост" in user_message:
-        await update.message.reply_text(
-            "Подростковая одежда 👕\n\n"
-            "Напишите:\n"
-            "• возраст\n"
-            "• размер\n"
-            "• что ищете",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # размеры
-    if "размер" in user_message:
+    if lower_message in ["📏 размеры", "размеры", "размер", "размерная сетка"]:
         await update.message.reply_text(
             "📏 Размерная сетка:\n\n"
-            "80–86 — 1–1.5 года\n"
-            "92–98 — 2–3 года\n"
-            "104–110 — 4–5 лет\n"
-            "116–122 — 6–7 лет\n"
-            "128–134 — 8–9 лет\n"
-            "140–146 — 10–11 лет\n"
-            "152–158 — 12–13 лет\n"
-            "164 — подростки",
+            "👶 Новорождённые:\n"
+            "• 0–3 мес — 56–62 см\n"
+            "• 3–6 мес — 62–68 см\n"
+            "• 6–9 мес — 68–74 см\n"
+            "• 9–12 мес — 74–80 см\n\n"
+            "🧒 Дети:\n"
+            "• 1–2 года — 80–92 см\n"
+            "• 2–3 года — 92–98 см\n"
+            "• 3–4 года — 98–104 см\n"
+            "• 4–5 лет — 104–110 см\n"
+            "• 5–6 лет — 110–116 см\n"
+            "• 6–7 лет — 116–122 см\n"
+            "• 7–8 лет — 122–128 см\n"
+            "• 8–9 лет — 128–134 см\n"
+            "• 9–10 лет — 134–140 см\n\n"
+            "🧑 Подростки:\n"
+            "• 11–12 лет — 146–152 см\n"
+            "• 13–14 лет — 158–164 см\n\n"
+            "Если хотите, напишите возраст или рост ребёнка — помогу сориентироваться 💕",
             reply_markup=reply_markup,
         )
         return
 
-    # новинки
-    if "новин" in user_message:
-        await update.message.reply_text(
-            "Скоро добавим новинки ❤️",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # адрес
-    if "адрес" in user_message:
+    if lower_message in ["📍 адрес", "адрес"]:
         await update.message.reply_text(
             "📍 Гагарина 60, ТД Астана",
             reply_markup=reply_markup,
         )
         return
 
-    # связь
-    if "связ" in user_message or "продав" in user_message:
+    if lower_message in ["🕒 режим работы", "режим работы", "график"]:
         await update.message.reply_text(
-            "📞 Телефон: 8-775-45-20-600\n"
-            "📍 Гагарина 60, ТД Астана",
+            "🕒 Ежедневно с 10:00 до 18:00",
             reply_markup=reply_markup,
         )
         return
 
-    # если не понял
-    await update.message.reply_text(
-        "Уточните, пожалуйста, что именно ищете 😊\n\n"
-        "Например:\n"
-        "• платье на девочку 6 лет\n"
-        "• обувь 28 размер\n"
-        "• одежда для новорожденного",
-        reply_markup=reply_markup,
-    )
+    if lower_message in ["💬 связь с продавцом", "связь с продавцом", "продавец", "связь"]:
+        await update.message.reply_text(
+            "📞 Связь с продавцом:\n\n"
+            "Телефон: 8-775-45-20-600\n"
+            "📍 Гагарина 60, ТД Астана\n\n"
+            "Можете написать или позвонить 💕",
+            reply_markup=reply_markup,
+        )
+        return
 
+    if lower_message in ["🆕 новинки", "новинки", "новое поступление"]:
+        await update.message.reply_text(
+            "🆕 Новинки уже скоро добавим сюда 💕\n"
+            "Можете написать, что именно вас интересует, и я помогу с подбором.",
+            reply_markup=reply_markup,
+        )
+        return
 
-# запуск
+    # Всё остальное отдаём AI
+    try:
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+        )
+
+        answer = response.output_text.strip()
+
+        if not answer:
+            answer = (
+                "Да, конечно 😊 Подскажите, пожалуйста, что именно вас интересует — "
+                "платья, обувь, новорождённые или подростковая одежда?"
+            )
+
+        await update.message.reply_text(
+            answer,
+            reply_markup=reply_markup,
+        )
+
+    except Exception:
+        await update.message.reply_text(
+            "Да, конечно 😊 Напишите, пожалуйста, что именно вас интересует:\n"
+            "• платья\n"
+            "• новорождённые\n"
+            "• подростковая одежда\n"
+            "• обувь\n"
+            "• размеры",
+            reply_markup=reply_markup,
+        )
+
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
