@@ -23,7 +23,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.strip().lower()
-
+if any(word in user_message for word in ["здравствуйте", "привет", "добрый день", "салам"]):
+    await update.message.reply_text(
+        "Здравствуйте 🌸\n"
+        "Добро пожаловать в наш магазин детской и подростковой одежды 👗\n\n"
+        "Напишите, что вас интересует:\n"
+        "• платья\n"
+        "• новорождённые\n"
+        "• подростковая одежда\n"
+        "• обувь\n"
+        "• размеры\n"
+        "• новинки",
+        reply_markup=reply_markup
+    )
+    return
     if user_message in ["🌿 каталог", "каталог"]:
         await update.message.reply_text(
             "🛍 У нас есть:\n\n"
