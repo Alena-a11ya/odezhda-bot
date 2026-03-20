@@ -99,8 +99,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # если не понял
-    await update.message.reply_text(
+        # если не понял
+        await update.message.reply_text(
         "Уточните, пожалуйста, что именно ищете 😊\n\n"
         "Например:\n"
         "• платье на девочку 6 лет\n"
