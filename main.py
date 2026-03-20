@@ -45,6 +45,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text("Я жива ✅")
+    return
     user_message = update.message.text.strip().lower()
 if any(word in user_message for word in ["здравствуйте", "привет", "добрый день", "добрый вечер", "салам"]):
         await update.message.reply_text(
