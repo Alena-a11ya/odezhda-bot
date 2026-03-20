@@ -106,7 +106,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
        return
    # платья
-if "плать" in user_message:
+    if "плать" in user_message:
     await update.message.reply_text(
         "Да, конечно 😊 Сейчас подберём платья.\n\n"
         "Подскажите, пожалуйста:\n"
@@ -126,7 +126,7 @@ if "плать" in user_message:
     "• обувь 28 размер\n"
     "• одежда для новорождённого",
     reply_markup=reply_markup,
-)
+    )
        return
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
