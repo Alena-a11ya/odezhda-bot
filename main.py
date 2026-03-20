@@ -18,17 +18,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Добро пожаловать в наш магазин детской и подростковой одежды 👗\n\n"
         "Выберите раздел ниже 👇",
         reply_markup=reply_markup,
-    )
-
+       )
+       return
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.strip().lower()
 
     # приветствие
-    if "здрав" in user_message or "привет" in user_message or "добрый" in user_message:
+    if "привет" in user_message or "здрав" in user_message:
         await update.message.reply_text(
-            "Здравствуйте 🌸\n"
-            "Чем могу помочь? 😊",
+            "Здравствуйте 🌸\nЧем могу помочь?",
             reply_markup=reply_markup,
         )
         return
@@ -36,7 +35,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # прощание
     if "пока" in user_message or "свид" in user_message:
         await update.message.reply_text(
-            "До свидания 🌷\nБудем рады видеть вас снова 💕",
+            "До свидания 🌷 Будем рады видеть вас снова ❤️",
             reply_markup=reply_markup,
         )
         return
@@ -44,21 +43,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # каталог
     if "каталог" in user_message:
         await update.message.reply_text(
-            "🛍 У нас есть:\n\n"
+            "У нас есть:\n\n"
             "• Платья\n"
             "• Одежда для новорождённых\n"
-            "• Одежда для девочек\n"
-            "• Одежда для мальчиков\n"
             "• Подростковая одежда\n"
             "• Обувь",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # размеры
-    if "размер" in user_message:
-        await update.message.reply_text(
-            "📏 Напишите возраст или рост ребёнка — помогу подобрать 💕",
             reply_markup=reply_markup,
         )
         return
@@ -87,48 +76,38 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup,
         )
         return
-# режим работы
-    if user_message in ["🕒 режим работы", "режим работы", "график"]:
+
+    # режим работы
+    if "режим" in user_message:
         await update.message.reply_text(
-            "🕒 Режим работы:\nЕжедневно с 10:00 до 18:00",
+            "🕒 Ежедневно с 10:00 до 18:00",
             reply_markup=reply_markup,
         )
         return
 
-    # связь с продавцом
-    if user_message in ["💬 связь с продавцом", "связь с продавцом", "продавец", "связь"]:
+    # платья
+    if "плать" in user_message:
         await update.message.reply_text(
-            "📞 Связь с продавцом:\n\n"
-            "Телефон: 8-775-45-20-600\n"
-            "📍 Адрес: Гагарина 60, ТД Астана\n\n"
-            "Можете написать или позвонить 💕",
+            "Да, конечно 😊 Сейчас подберём платья.\n\n"
+            "Подскажите:\n"
+            "• возраст\n"
+            "• рост ребёнка\n\n"
+            "Какие модели интересуют:\n"
+            "• повседневные\n"
+            "• нарядные",
             reply_markup=reply_markup,
         )
-       return
-   # платья
-    if "плать" in user_message:
+        return
+
+    # если не понял
     await update.message.reply_text(
-        "Да, конечно 😊 Сейчас подберём платья.\n\n"
-        "Подскажите, пожалуйста:\n"
-        "• возраст\n"
-        "• рост ребёнка\n\n"
-        "И какие модели интересуют:\n"
-        "• повседневные\n"
-        "• нарядные\n"
-        "• для садика",
+        "Уточните, пожалуйста, что именно ищете 😊\n\n"
+        "Например:\n"
+        "• платье на девочку 6 лет\n"
+        "• обувь 28 размер\n"
+        "• одежда для новорождённого",
         reply_markup=reply_markup,
     )
-    return
-    await update.message.reply_text(
-    "Уточните, пожалуйста, что именно ищете 😊\n\n"
-    "Например:\n"
-    "• платье на девочку 6 лет\n"
-    "• обувь 28 размер\n"
-    "• одежда для новорождённого",
-    reply_markup=reply_markup,
-    )
-       return
-
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
