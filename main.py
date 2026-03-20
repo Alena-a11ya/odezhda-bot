@@ -104,20 +104,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Можете написать или позвонить 💕",
             reply_markup=reply_markup,
         )
-        return
-    # общий ответ
+       return
+   # платья
+if "плать" in user_message:
     await update.message.reply_text(
-        "Я помогу вам с выбором 🌸\n\n"
-        "Напишите:\n"
-        "• платья\n"
-        "• новорождённые\n"
-        "• подростковая одежда\n"
-        "• обувь\n"
-        "• размеры\n"
-        "• новинки",
+        "Да, конечно 😊 Сейчас подберём платья.\n\n"
+        "Подскажите, пожалуйста:\n"
+        "• возраст\n"
+        "• рост ребёнка\n\n"
+        "И какие модели интересуют:\n"
+        "• повседневные\n"
+        "• нарядные\n"
+        "• для садика",
         reply_markup=reply_markup,
     )
-
+    return
+    await update.message.reply_text(
+    "Уточните, пожалуйста, что именно ищете 😊\n\n"
+    "Например:\n"
+    "• платье на девочку 6 лет\n"
+    "• обувь 28 размер\n"
+    "• одежда для новорождённого",
+    reply_markup=reply_markup,
+)
+       return
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
