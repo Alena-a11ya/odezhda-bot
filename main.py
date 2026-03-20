@@ -1,53 +1,101 @@
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
 TELEGRAM_TOKEN ="8752728755:AAEGoRLOkXbrbgXEbgZ2ye79oIkXDr7bWZk"
 
-keyboard = [
-    ["🌿 Каталог", "📏 Размеры"],
-    ["📍 Адрес", "🕒 Режим работы"],
-    ["💬 Связь с продавцом", "🆕 Новинки"],
-]
+# кнопки
+reply_markup = ReplyKeyboardMarkup(
+    [
+        ["Платья", "Обувь"],
+        ["Новорожденные", "Подростковая одежда"],
+        ["Размеры", "Новинки"],
+        ["Адрес", "Связь с продавцом"],
+    ],
+    resize_keyboard=True,
+)
 
-reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
-
+# старт
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Здравствуйте 🌸\n"
-        "Добро пожаловать в наш магазин детской и подростковой одежды 👗\n\n"
+        "Добро пожаловать 🌸\n"
+        "В наш магазин детской и подростковой одежды\n\n"
         "Выберите раздел ниже 👇",
         reply_markup=reply_markup,
-       )
-       return
+    )
 
+# ответы
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text.strip().lower()
+    user_message = update.message.text.lower()
 
-    # приветствие
-    if "привет" in user_message or "здрав" in user_message:
+    # платья
+    if "плать" in user_message:
         await update.message.reply_text(
-            "Здравствуйте 🌸\nЧем могу помочь?",
+            "Отлично 👗\n\n"
+            "Напишите, пожалуйста:\n"
+            "• возраст ребёнка\n"
+            "• рост\n"
+            "• какие модели интересуют:\n"
+            "  — повседневные\n"
+            "  — нарядные",
             reply_markup=reply_markup,
         )
         return
 
-    # прощание
-    if "пока" in user_message or "свид" in user_message:
+    # обувь
+    if "обув" in user_message:
         await update.message.reply_text(
-            "До свидания 🌷 Будем рады видеть вас снова ❤️",
+            "Хорошо 👟\n\n"
+            "Напишите:\n"
+            "• размер\n"
+            "• для девочки или мальчика",
             reply_markup=reply_markup,
         )
         return
 
-    # каталог
-    if "каталог" in user_message:
+    # новорожденные
+    if "новорож" in user_message:
         await update.message.reply_text(
-            "У нас есть:\n\n"
-            "• Платья\n"
-            "• Одежда для новорождённых\n"
-            "• Подростковая одежда\n"
-            "• Обувь",
+            "Для новорожденных 👶\n\n"
+            "Напишите:\n"
+            "• возраст\n"
+            "• что именно ищете",
+            reply_markup=reply_markup,
+        )
+        return
+
+    # подростки
+    if "подрост" in user_message:
+        await update.message.reply_text(
+            "Подростковая одежда 👕\n\n"
+            "Напишите:\n"
+            "• возраст\n"
+            "• размер\n"
+            "• что ищете",
+            reply_markup=reply_markup,
+        )
+        return
+
+    # размеры
+    if "размер" in user_message:
+        await update.message.reply_text(
+            "📏 Размерная сетка:\n\n"
+            "80–86 — 1–1.5 года\n"
+            "92–98 — 2–3 года\n"
+            "104–110 — 4–5 лет\n"
+            "116–122 — 6–7 лет\n"
+            "128–134 — 8–9 лет\n"
+            "140–146 — 10–11 лет\n"
+            "152–158 — 12–13 лет\n"
+            "164 — подростки",
+            reply_markup=reply_markup,
+        )
+        return
+
+    # новинки
+    if "новин" in user_message:
+        await update.message.reply_text(
+            "Скоро добавим новинки ❤️",
             reply_markup=reply_markup,
         )
         return
@@ -60,8 +108,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # продавец
-    if "продав" in user_message or "связ" in user_message:
+    # связь
+    if "связ" in user_message or "продав" in user_message:
         await update.message.reply_text(
             "📞 Телефон: 8-775-45-20-600\n"
             "📍 Гагарина 60, ТД Астана",
@@ -69,50 +117,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # новинки
-    if "новин" in user_message:
-        await update.message.reply_text(
-            "🆕 Скоро добавим новинки 💕",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # режим работы
-    if "режим" in user_message:
-        await update.message.reply_text(
-            "🕒 Ежедневно с 10:00 до 18:00",
-            reply_markup=reply_markup,
-        )
-        return
-
-    # платья
-    if "плать" in user_message:
-        await update.message.reply_text(
-            "Да, конечно 😊 Сейчас подберём платья.\n\n"
-            "Подскажите:\n"
-            "• возраст\n"
-            "• рост ребёнка\n\n"
-            "Какие модели интересуют:\n"
-            "• повседневные\n"
-            "• нарядные",
-            reply_markup=reply_markup,
-        )
-        return
-
-        # если не понял
-        await update.message.reply_text(
+    # если не понял
+    await update.message.reply_text(
         "Уточните, пожалуйста, что именно ищете 😊\n\n"
         "Например:\n"
         "• платье на девочку 6 лет\n"
         "• обувь 28 размер\n"
-        "• одежда для новорождённого",
+        "• одежда для новорожденного",
         reply_markup=reply_markup,
     )
+
+
+# запуск
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Бот запущен...")
 app.run_polling()
-
-
