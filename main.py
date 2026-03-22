@@ -209,7 +209,7 @@ text = update.message.text.lower()
 
         answer = (response.output_text or "").strip()
 
-        if not answer:
+     if not answer:
             answer = (
                 "Хорошо 😊 Давайте подберём.\n"
                 "Подскажите, пожалуйста, возраст или рост ребёнка и что именно ищете?"
