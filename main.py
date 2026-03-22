@@ -175,26 +175,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lower_message = user_message.lower()
 text = update.message.text.lower()
 
-# Платья
-if "плать" in text:
-    await update.message.reply_photo("ССЫЛКА_НА_ПЛАТЬЕ_1")
-    await update.message.reply_photo("ССЫЛКА_НА_ПЛАТЬЕ_2")
-
-# Джинсы
-elif "джинс" in text:
-    await update.message.reply_photo("ССЫЛКА_НА_ДЖИНСЫ_1")
-    await update.message.reply_photo("ССЫЛКА_НА_ДЖИНСЫ_2")
-
-# Футболки
-elif "футбол" in text:
-    await update.message.reply_photo("ССЫЛКА_НА_ФУТБОЛКУ_1")
-    # Служебные кнопки
-    if lower_message in ["📍 адрес", "адрес"]:
-        answer = "📍 Гагарина 60, ТД Астана"
-        await update.message.reply_text(answer, reply_markup=reply_markup)
-        chat_memory[chat_id].append({"role": "user", "content": user_message})
-        chat_memory[chat_id].append({"role": "assistant", "content": answer})
-        return
 
    elif  lower_message in ["🕒 режим работы", "режим работы", "график"]:
         answer = "🕒 Ежедневно с 10:00 до 18:00"
