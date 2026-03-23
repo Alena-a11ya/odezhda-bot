@@ -176,14 +176,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 text = update.message.text.lower()
 
 
-   if lower_message in ["📍 адрес", "адрес"]:
+if lower_message in ["📍 адрес", "адрес"]:
         answer = "📍 Гагарина 60, ТД Астана"
         await update.message.reply_text(answer, reply_markup=reply_markup)
         chat_memory[chat_id].append({"role": "user", "content": user_message})
         chat_memory[chat_id].append({"role": "assistant", "content": answer})
         return
 
-   elif lower_message in ["🕒 режим работы", "режим работы", "график"]:
+    elif lower_message in ["🕒 режим работы", "режим работы", "график"]:
         answer = "🕒 Ежедневно с 10:00 до 18:00"
         await update.message.reply_text(answer, reply_markup=reply_markup)
         chat_memory[chat_id].append({"role": "user", "content": user_message})
