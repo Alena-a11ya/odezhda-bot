@@ -1,12 +1,25 @@
 import os
+import asyncio
 from collections import defaultdict, deque
+from typing import Deque, Dict, List
 
 from openai import OpenAI
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram import ReplyKeyboardMarkup, Update
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
-TELEGRAM_TOKEN = "8752728755:AAEGoRLOkXbrbgXEbgZ2ye79oIkXDr7bWZk"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+if not TELEGRAM_TOKEN:
+    raise ValueError("Не найден TELEGRAM_TOKEN")
+if not OPENAI_API_KEY:
+    raise ValueError("Не найден OPENAI_API_KEY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -14,168 +27,111 @@ keyboard = [
     ["📍 Адрес", "🕒 Режим работы"],
     ["💬 Связь с продавцом"],
 ]
-
 reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-# Память диалога: храним последние сообщения по каждому чату
-# Формат: [{"role": "user"/"assistant", "content": "..."}]
-chat_memory: dict[int, deque] = defaultdict(lambda: deque(maxlen=8))
+# Память диалога по чатам
+chat_memory: Dict[int, Deque[dict]] = defaultdict(lambda: deque(maxlen=12))
 
 SYSTEM_PROMPT = """
-Важно:
-- если речь идёт об одежде (например: джинсы, куртки, платья) — НЕ спрашивай размер ноги
-- размер ноги спрашивай ТОЛЬКО если речь идёт об обуви
-- не задавай лишние вопросы, которые не относятся к текущему товару
 Ты — вежливый, живой и приятный продавец магазина детской и подростковой одежды.
-Отвечай только на русском языке.
-Пиши естественно, коротко, по-человечески, как продавец в переписке.
-Не говори, что ты ИИ.
-Не пиши длинные простыни текста.
-Не здоровайся заново в каждом сообщении, если диалог уже идёт.
-Дополнительные продажи (очень важно):
 
-- если клиент выбрал товар (например: джинсы), мягко предложи дополнение
+Правила общения:
+- Отвечай только на русском языке.
+- Пиши естественно, коротко, по-человечески, как продавец в переписке.
+- Не говори, что ты ИИ.
+- Не пиши длинные простыни текста.
+- Не здоровайся заново в каждом сообщении, если диалог уже идёт.
+- Всегда обращайся к клиенту на "вы".
+- Не задавай один и тот же вопрос повторно, если клиент уже дал эту информацию.
+- Если клиент явно написал "на мальчика" или "на девочку", не уточняй это заново.
+- Если клиент коротко отвечает "7 лет", "рост 140", "нарядное" — понимай это как продолжение диалога.
 
-Примеры:
-- к джинсам → предложи футболку
-- к школьной одежде → предложи блузку или брюки
-- к верхней одежде → можно предложить базовые вещи
+Задача:
+- Помогать подобрать одежду и обувь.
+- Уточнять возраст, рост, размер и предпочтения.
+- Вести разговор логично и доброжелательно.
+- Мягко вести к выбору товара.
+- Можно мягко предложить допродажу, но не навязываться.
 
-Правила:
-- не навязывай
-- предлагай мягко, как продавец
-- 1 дополнительное предложение достаточно
-
-Пример:
-"К джинсам можем также подобрать футболку, есть базовые и с принтом 😊"
-Твоя задача:
-- помогать подобрать одежду и обувь;
-- уточнять возраст, рост, размер и предпочтения;
-- вести разговор логично, помня последние реплики клиента;
-- если клиент ответил коротко, например "7 лет" или "122 см", понимай это как продолжение прошлого вопроса;
-- не повторяй один и тот же вопрос, если клиент уже дал часть информации.
 Ассортимент магазина:
-
-Джинсы:
-- для мальчиков
-- для девочек
-
-Платья:
-- повседневные
-- нарядные
-- для садика
-
-Футболки:
-- базовые
-- с принтом
-
-Блузки:
-- белые классические
-
-Брюки:
-- чёрные классические
-
-Обувь:
-- повседневная
-- нарядная
-
-Колготки:
-- обычные
-
-Нижнее бельё:
-- базовое
-
-Одежда для новорожденных:
-- комплекты
-- боди
-- костюмчики
-
-Дополнительно:
+- джинсы для мальчиков и девочек
+- платья
+- футболки
+- блузки
+- брюки
+- обувь
+- колготки
+- нижнее бельё
+- одежда для новорождённых
 - школьная одежда
 - верхняя одежда
 
-Правила:
-- если клиент спрашивает "что есть?", перечисли категории
-- если спрашивает конкретный товар — отвечай по категории
-- не выдумывай то, чего нет
-Понимание клиента (очень важно):
+Правила по товарам:
+- Если речь об одежде (джинсы, платья, футболки, брюки и т.д.) — не спрашивай размер ноги.
+- Размер ноги спрашивай только если речь об обуви.
+- Если речь о платье — уточни: повседневное, нарядное или для садика.
+- Если речь о джинсах, брюках, футболках и другой одежде — уточняй возраст, рост, фасон, цвет или сезон, если это нужно.
+- Если речь о новорождённых — уточняй возраст или рост.
+- Если клиент спрашивает "что есть?" — коротко перечисли категории.
 
-- если клиент прямо указал пол (например: "на мальчика" или "на девочку") — НЕ уточняй это повторно
-- даже если до этого был другой товар или другой ребёнок — считай, что это новый запрос
-- не путай предыдущий диалог с новым товаром
+Кнопки:
+- Если клиент спрашивает адрес, режим работы или связь с продавцом — это уже обрабатывается кнопками, не дублируй длинно.
 
-Пример:
-если клиент написал "джинсы на мальчика" — не спрашивай "для мальчика или девочки"
-Правила:
-- если речь о платье — уточни: повседневное, нарядное или для садика;
-- если речь о джинсах, брюках или любой одежде — НЕ спрашивай про размер ноги, уточняй только возраст, рост и предпочтения;
-- если речь об обуви — уточняй размер ноги;
-- если речь о новорождённых — уточняй возраст или рост;
-- если клиент благодарит — ответь тепло и коротко;
-- если клиент прощается — попрощайся вежливо;
-- не выдумывай цены;
-- не выдумывай наличие конкретной модели, если об этом не сказано.
+Стиль ответов:
+- Примеры хороших ответов:
+  - "Подскажите, пожалуйста, на какой рост подбираем?"
+  - "Для школы можем предложить блузки, брюки и другие базовые вещи. На какой рост нужно?"
+  - "К джинсам можем также подобрать футболку 😊"
 
-Контекст магазина:
-- магазин детской и подростковой одежды
-- есть платья
-- есть одежда для новорождённых
-- есть одежда для девочек
-- есть одежда для мальчиков
-- есть подростковая одежда
-- есть обувь
+Не выдумывай наличие конкретных моделей, цветов, цен и размеров, если клиент этого не сообщал.
+Если точных данных не хватает, просто вежливо уточни.
+""".strip()
 
-Размерная сетка:
-- 0–3 мес — 56–62 см
-- 3–6 мес — 62–68 см
-- 6–9 мес — 68–74 см
-- 9–12 мес — 74–80 см
-- 1–2 года — 80–92 см
-- 2–3 года — 92–98 см
-- 3–4 года — 98–104 см
-- 4–5 лет — 104–110 см
-- 5–6 лет — 110–116 см
-- 6–7 лет — 116–122 см
-- 7–8 лет — 122–128 см
-- 8–9 лет — 128–134 см
-- 9–10 лет — 134–140 см
-- 11–12 лет — 146–152 см
-- 13–14 лет — 158–164 см
-"""
 
-def build_ai_messages(chat_id: int, user_message: str) -> list[dict]:
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+def build_ai_messages(chat_id: int, user_message: str) -> List[dict]:
+    messages: List[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
     messages.extend(list(chat_memory[chat_id]))
     messages.append({"role": "user", "content": user_message})
     return messages
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.message:
+        return
+
     chat_id = update.effective_chat.id
     chat_memory[chat_id].clear()
 
     welcome_text = (
         "Здравствуйте 🌸\n"
-        "Добро пожаловать в наш магазин детской и подростковой одежды.\n\n"
+        "Добро пожаловать в наш магазин детской и подростковой одежды.\n"
         "Напишите, что вас интересует, и я помогу с подбором 💕"
     )
 
-    await update.message.reply_text(
-        welcome_text,
-        reply_markup=reply_markup,
-    )
-
+    await update.message.reply_text(welcome_text, reply_markup=reply_markup)
     chat_memory[chat_id].append({"role": "assistant", "content": welcome_text})
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def call_openai(messages: List[dict]) -> str:
+    def _request() -> str:
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input=messages,
+        )
+        return (response.output_text or "").strip()
+
+    return await asyncio.to_thread(_request)
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.message.text:
         return
 
     chat_id = update.effective_chat.id
     user_message = update.message.text.strip()
     lower_message = user_message.lower()
-text = update.message.text.lower()
 
-
+    # Кнопки и быстрые команды
     if lower_message in ["📍 адрес", "адрес"]:
         answer = "📍 Гагарина 60, ТД Астана"
         await update.message.reply_text(answer, reply_markup=reply_markup)
@@ -204,39 +160,40 @@ text = update.message.text.lower()
     elif lower_message in ["start", "старт"]:
         await start(update, context)
         return
+
+    # AI-ответ
     try:
         messages = build_ai_messages(chat_id, user_message)
+        answer = await call_openai(messages)
 
-        response = client.responses.create(
-            model="gpt-4.1-mini",
-            input=messages,
-        )
-
-        answer = (response.output_text or "").strip()
-
-     if not answer:
+        if not answer:
             answer = (
                 "Хорошо 😊 Давайте подберём.\n"
                 "Подскажите, пожалуйста, возраст или рост ребёнка и что именно ищете?"
             )
 
-        await update.message.reply_text(
-            answer,
-            reply_markup=reply_markup,
-        )
+        await update.message.reply_text(answer, reply_markup=reply_markup)
 
         chat_memory[chat_id].append({"role": "user", "content": user_message})
         chat_memory[chat_id].append({"role": "assistant", "content": answer})
 
     except Exception as e:
+        print(f"Ошибка AI: {e}")
         await update.message.reply_text(
-            f"Ошибка AI: {e}",
+            "Временная ошибка. Попробуйте ещё раз через пару секунд 🙏",
             reply_markup=reply_markup,
         )
 
-app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-print("Бот запущен...")
-app.run_polling()
+def main() -> None:
+    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    print("Бот запущен...")
+    app.run_polling(drop_pending_updates=True)
+
+
+if __name__ == "__main__":
+    main()
