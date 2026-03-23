@@ -176,7 +176,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 text = update.message.text.lower()
 
 
-   if  lower_message in ["🕒 режим работы", "режим работы", "график"]:
+if lower_message in ["📍 адрес", "адрес"]:
+        answer = "📍 Гагарина 60, ТД Астана"
+        await update.message.reply_text(answer, reply_markup=reply_markup)
+        chat_memory[chat_id].append({"role": "user", "content": user_message})
+        chat_memory[chat_id].append({"role": "assistant", "content": answer})
+        return
+
+    elif lower_message in ["🕒 режим работы", "режим работы", "график"]:
         answer = "🕒 Ежедневно с 10:00 до 18:00"
         await update.message.reply_text(answer, reply_markup=reply_markup)
         chat_memory[chat_id].append({"role": "user", "content": user_message})
@@ -194,11 +201,9 @@ text = update.message.text.lower()
         chat_memory[chat_id].append({"role": "assistant", "content": answer})
         return
 
-    # Чтобы и start/старт без слэша тоже работал
-    if lower_message in ["start", "старт"]:
+    elif lower_message in ["start", "старт"]:
         await start(update, context)
         return
-
     try:
         messages = build_ai_messages(chat_id, user_message)
 
