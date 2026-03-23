@@ -176,7 +176,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 text = update.message.text.lower()
 
 
-if lower_message in ["📍 адрес", "адрес"]:
+     if lower_message in ["📍 адрес", "адрес"]:
         answer = "📍 Гагарина 60, ТД Астана"
         await update.message.reply_text(answer, reply_markup=reply_markup)
         chat_memory[chat_id].append({"role": "user", "content": user_message})
