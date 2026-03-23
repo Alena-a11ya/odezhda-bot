@@ -183,7 +183,7 @@ text = update.message.text.lower()
         chat_memory[chat_id].append({"role": "assistant", "content": answer})
         return
 
-    elif lower_message in ["🕒 режим работы", "режим работы", "график"]:
+    if lower_message in ["🕒 режим работы", "режим работы", "график"]:
         answer = "🕒 Ежедневно с 10:00 до 18:00"
         await update.message.reply_text(answer, reply_markup=reply_markup)
         chat_memory[chat_id].append({"role": "user", "content": user_message})
